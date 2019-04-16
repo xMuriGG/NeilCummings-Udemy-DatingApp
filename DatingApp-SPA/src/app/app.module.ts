@@ -27,6 +27,9 @@ import { environment } from 'src/environments/environment';
 import { MemberDetailComponent } from './members/member-detail/member-detail.component';
 import { MemberDetailResolver } from './_resolvers/member-detail.resolver';
 import { MemberListResolver } from './_resolvers/member-list.resolver';
+import { MemberEditComponent } from './members/member-edit/member-edit.component';
+import { MemberEditResolver } from './_resolvers/member-edit.resolver';
+import { UnsavedChangesGuard } from './_guards/unsaved-changes.guard';
 
 
 export function tokenGetter() {
@@ -42,6 +45,7 @@ export function tokenGetter() {
       MemberListComponent,
       MemberCardComponent,
       MemberDetailComponent,
+      MemberEditComponent,
       ListsComponent,
       MessagesComponent
    ],
@@ -68,9 +72,14 @@ export function tokenGetter() {
       ErrorInterceptorProvider,
 
       AlertifyService,
+
       AuthGuard,
+      UnsavedChangesGuard,
+      
       MemberDetailResolver,
       MemberListResolver,
+      MemberEditResolver,
+
 
       AuthService,
       UserService,
