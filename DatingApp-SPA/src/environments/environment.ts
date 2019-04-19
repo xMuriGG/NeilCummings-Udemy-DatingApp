@@ -3,12 +3,12 @@
 // The list of file replacements can be found in `angular.json`.
 const protocolUrl = 'http://';
 const hostUrl = 'localhost:5000';
-const baseUrl = protocolUrl + hostUrl;
+const baseUrl = protocolUrl + hostUrl + '/api/';
 export const environment = {
   production: false,
   hostUrl,
   baseUrl,
-  apiUrl: baseUrl + '/api/'
+  apiUrl: baseUrl
 };
 
 /*
