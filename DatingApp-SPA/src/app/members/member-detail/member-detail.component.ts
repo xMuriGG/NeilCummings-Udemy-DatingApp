@@ -14,6 +14,8 @@ export class MemberDetailComponent implements OnInit {
   user: User;
   galleryOptions: NgxGalleryOptions[];
   galleryImages: NgxGalleryImage[];
+  live = true;
+  date = Date.now() - 55000;
 
   constructor(private userService: UserService, private alertify: AlertifyService,
     private route: ActivatedRoute) { }
@@ -21,6 +23,7 @@ export class MemberDetailComponent implements OnInit {
   ngOnInit() {
     this.route.data.subscribe(data => {
       this.user = data.user;
+      this.user.lastActive = new Date(this.user.lastActive); //iz nekog raloga timeago:live pipe ne radi ako ne pretvorimo datum u Date 
     });
 
     this.galleryOptions = [{
