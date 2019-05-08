@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -25,13 +26,24 @@ namespace DatingApp.API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetUsers()
+        public async Task<IActionResult> GetUsers([FromQuery]UserParams userParams)
         {
-            var users = await _repo.GetUsersAsync();
-            var userToReturn = _mapper.Map<IEnumerable<UserForListDto>>(users);
+            var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+            userParams.UserId = currentUserId;
+            //var userFromRepo = await _repo.GetUserAsync(currentUserId);
+            //userParams.UserId = userFromRepo.Id;
+            //if (string.IsNullOrEmpty(userParams.Gender))
+            //{
+            //    userParams.Gender = userFromRepo.Gender == "male" ? "female" : "male";
+            //}
+
+            var pagedList = await _repo.GetUsersAsync(userParams);
+            var userToReturn = _mapper.Map<IEnumerable<UserForListDto>>(pagedList);
+            Response.AddPagination(pagedList.CurrentPage, pagedList.PageSize, pagedList.TotalCount, pagedList.TotalPages);
+
             return Ok(userToReturn);
         }
-        [HttpGet("{id}",Name = "GetUser")]
+        [HttpGet("{id}", Name = "GetUser")]
         public async Task<IActionResult> GetUser(int id)
         {
             var user = await _repo.GetUserAsync(id);

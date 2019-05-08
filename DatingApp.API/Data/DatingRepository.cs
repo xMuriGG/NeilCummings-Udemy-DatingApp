@@ -1,8 +1,9 @@
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using DatingApp.API.Helpers;
 using DatingApp.API.Models;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace DatingApp.API.Data
 {
@@ -27,7 +28,7 @@ namespace DatingApp.API.Data
 
         public async Task<User> GetUserAsync(int id)
         {
-            var user = await _db.Users.Include(i=>i.Photos).FirstOrDefaultAsync(f => f.Id == id);
+            var user = await _db.Users.Include(i => i.Photos).FirstOrDefaultAsync(f => f.Id == id);
             user.Photos = user.Photos?.OrderByDescending(ob => ob.IsMain).ToList();
             return user;
         }
@@ -44,10 +45,52 @@ namespace DatingApp.API.Data
             return photo;
         }
 
-        public async Task<IEnumerable<User>> GetUsersAsync()
+        public async Task<PagedList<User>> GetUsersAsync(UserParams userParams)
         {
-            var users = await _db.Users.Include(i => i.Photos).ToListAsync();
-            return users;
+            var query = _db.Users.Include(i => i.Photos).AsQueryable();
+            query = query.Where(w => (w.Gender == userParams.Gender || userParams.Gender == null) && w.Id != userParams.UserId);
+            DateTime? minDob = null;
+            DateTime? maxDob = null;
+
+            if (userParams.MaxAge is int max)
+            {
+                minDob = DateTime.Today.AddYears(-max - 1);
+            }
+            if (userParams.MinAge is int min)
+            {
+                maxDob = DateTime.Today.AddYears(-min);
+            }
+            query = query.Where(w => (w.DateOfBirth >= minDob || minDob == null) && (w.DateOfBirth <= maxDob || maxDob == null));
+            // Još neki od slučajeva sa pattern matchingom
+            //var minDob2 = userParams.MaxAge !=null ? DateTime.Today.AddYears((int)-userParams.MaxAge - 1) : (DateTime?)null;
+            //var minDob3 = userParams.MaxAge is int maxx
+            //    ? DateTime.Today.AddYears((int) -userParams.MaxAge - 1)
+            //    : (DateTime?) null;
+
+            if (!string.IsNullOrEmpty(userParams.OrderBy))
+            {
+                switch (userParams.OrderBy)
+                {
+                    case "created":
+                        query = query.OrderBy(o => o.Created);break;
+                    case "createdDesc":
+                        query = query.OrderByDescending(o => o.Created);
+                        break;
+                    case "age":
+                        query = query.OrderBy(o => o.DateOfBirth);
+                        break;
+                    case "ageDesc":
+                        query = query.OrderByDescending(o => o.DateOfBirth);
+                        break;
+                    default: query = query.OrderByDescending(o => o.LastActive);
+                        break;
+                    
+                }
+            }
+
+            var pagedList = await PagedList<User>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
+
+            return pagedList;
         }
 
         public async Task<bool> SaveAll()

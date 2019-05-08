@@ -1,7 +1,65 @@
-<div class="container mt-5">
-  <div class="row">
-    <div *ngFor="let user of users" class="col-lg-2 col-md-3 col-sm-6">
-      <app-member-card [user]="user" ></app-member-card>
+<div class="text-center mt-3">
+  <h2>Your matches - {{paginatedUsersList.pagiantion.totalItems}} found</h2>
+</div>
+
+
+<div class="container mt-3">
+
+  <form class="form-inline" #form="ngForm" (ngSubmit)="loadUsers()" novalidate>
+    <div class="form-group">
+      <label for="minAge">Age From</label>
+      <input type="number" class="form-control ml-1" style="width: 70px" id="minAge" name="minAge"
+        [(ngModel)]="userParams.minAge">
     </div>
+
+    <div class="form-group px-2">
+      <label for="maxAge">Age To</label>
+      <input type="number" class="form-control ml-1" style="width: 70px" id="maxAge" name="maxAge"
+        [(ngModel)]="userParams.maxAge">
+    </div>
+
+    <div class="form-group px-2">
+      <label for="gender">Show: </label>
+      <select class="form-control ml-1" style="width: 130px" id="gender" name="gender" [(ngModel)]="userParams.gender">
+        <option value=""></option>
+        <option *ngFor="let gender of genderList" [value]="gender.value">
+          {{gender.display}}
+        </option>
+      </select>
+    </div>
+
+    
+    <div id="filterDDL" class="btn-group ml-4" dropdown >
+      <button dropdownToggle type="button" class="btn btn-secondary btn-sm dropdown-toggle"><span class="fa fa-sort-amount-asc"></span></button>
+      <ul  *dropdownMenu class="dropdown-menu" role="menu">
+        <li role="menuitem"><a class="dropdown-item" value="created" (click)="userParams.orderBy='';loadUsers()" >API Default(lastActive)</a></li>
+        <li role="menuitem"><a class="dropdown-item" value="created" (click)="userParams.orderBy='created';loadUsers()" >Created</a></li>
+        <li role="menuitem"><a class="dropdown-item" value="createdDesc" (click)="userParams.orderBy='createdDesc';loadUsers()" >Created Descending</a></li>        
+        <li role="menuitem"><a class="dropdown-item" value="createdDesc" (click)="userParams.orderBy='age';loadUsers()" >Age</a></li>        
+        <li role="menuitem"><a class="dropdown-item" value="createdDesc" (click)="userParams.orderBy='ageDesc';loadUsers()" >Age Descending</a></li>        
+      </ul>
+    </div>
+
+
+    <div class="btn-group ml-4">
+      <button type="submit" class="btn btn-primary" style="margin-left:10px">Apply Filters</button>
+      <button type="button" class="btn btn-info" style="margin-left:10px" (click)="resetFilters()">Reset Filter</button>
+    </div>
+
+  </form>
+  <br>
+
+
+  <div class="row">
+    <div *ngFor="let user of paginatedUsersList.result" class="col-lg-2 col-md-3 col-sm-6">
+      <app-member-card [user]="user"></app-member-card>
+    </div>
+  </div>
+  <div class="row justify-content-center">
+    <pagination [totalItems]="paginatedUsersList.pagiantion.totalItems"
+      [itemsPerPage]="paginatedUsersList.pagiantion.itemsPerPage"
+      [(ngModel)]="paginatedUsersList.pagiantion.currentPage" (pageChanged)="pageChanged($event)" [boundaryLinks]="true"
+      previousText="&lsaquo;" nextText="&rsaquo;" firstText="&laquo;" lastText="&raquo;">
+    </pagination>
   </div>
 </div>

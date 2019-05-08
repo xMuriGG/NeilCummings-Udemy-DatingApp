@@ -17,7 +17,7 @@ export const appRoutes: Routes = [
         path: '', runGuardsAndResolvers: 'always',
         canActivate: [AuthGuard],
         children: [
-            { path: 'members', component: MemberListComponent, resolve: { users: MemberListResolver } },
+            { path: 'members', component: MemberListComponent, resolve: { paginatedUsersList: MemberListResolver } },
             { path: 'members/:id', component: MemberDetailComponent, resolve: { user: MemberDetailResolver } },
             { path: 'member/edit', component: MemberEditComponent, resolve: {user: MemberEditResolver}, canDeactivate:[UnsavedChangesGuard]},
             { path: 'messages', component: MessagesComponent },
