@@ -10,17 +10,16 @@ import { catchError } from 'rxjs/operators';
 
 // Note: resolving dobijanje podataka prije aktiviranje rute
 
-export class MemberListResolver implements Resolve<User[]> {
+export class ListResolver implements Resolve<User[]> {
     constructor(private userService: UserService, private router: Router, private alertify: AlertifyService) { }
     pageNumber = 1;
     pageSize = 5;
-    user: User = JSON.parse(localStorage.getItem('user'));
+    likesParams = 'Likers';
 
 
     resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<User[]> {
 
-        const userParams = { gender: this.user.gender === 'male' ? 'female' : 'male', minAge: '', maxAge: '', orderBy: '' };
-        return this.userService.getUsers(this.pageNumber, this.pageSize, userParams).pipe(
+        return this.userService.getUsers(this.pageNumber, this.pageSize, null, this.likesParams).pipe(
             catchError(error => {
                 this.alertify.error('Problem retrieving users data');
                 this.router.navigate(['/home']);

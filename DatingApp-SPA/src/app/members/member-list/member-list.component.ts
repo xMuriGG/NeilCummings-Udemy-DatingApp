@@ -12,7 +12,6 @@ import { PaginatedResult } from 'src/app/_models/pagination';
   styleUrls: ['./member-list.component.css']
 })
 export class MemberListComponent implements OnInit {
-  // users: User[];
   paginatedUsersList: PaginatedResult<User[]>;
   user: User = JSON.parse(localStorage.getItem('user'));
   genderList = [{ value: 'male', display: 'Males' }, { value: 'female', display: 'Females' }];
@@ -24,7 +23,6 @@ export class MemberListComponent implements OnInit {
   ngOnInit() {
     this.route.data.subscribe(data => {
       this.paginatedUsersList = data.paginatedUsersList; // data.paginatedUsersList zbog routes.ts 'members' route
-      // this.users = this.paginatedUsersList.result;
 
       this.setFilters();
 
@@ -32,8 +30,7 @@ export class MemberListComponent implements OnInit {
   }
 
   loadUsers() {
-
-    this.userService.getUsers(this.paginatedUsersList.pagiantion.currentPage, this.paginatedUsersList.pagiantion.itemsPerPage,
+    this.userService.getUsers(this.paginatedUsersList.pagination.currentPage, this.paginatedUsersList.pagination.itemsPerPage,
       this.userParams)
       .subscribe((paginatedList: PaginatedResult<User[]>) => {
         this.paginatedUsersList = paginatedList;
@@ -43,7 +40,7 @@ export class MemberListComponent implements OnInit {
   }
 
   pageChanged(event: any): void {
-    this.paginatedUsersList.pagiantion.currentPage = event.page;
+    this.paginatedUsersList.pagination.currentPage = event.page;
     this.loadUsers();
   }
 

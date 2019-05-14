@@ -1,5 +1,5 @@
 <div class="text-center mt-3">
-  <h2>Your matches - {{paginatedUsersList.pagiantion.totalItems}} found</h2>
+  <h2>Your matches - {{paginatedUsersList.pagination.totalItems}} found</h2>
 </div>
 
 
@@ -56,9 +56,9 @@
     </div>
   </div>
   <div class="row justify-content-center">
-    <pagination [totalItems]="paginatedUsersList.pagiantion.totalItems"
-      [itemsPerPage]="paginatedUsersList.pagiantion.itemsPerPage"
-      [(ngModel)]="paginatedUsersList.pagiantion.currentPage" (pageChanged)="pageChanged($event)" [boundaryLinks]="true"
+    <pagination [totalItems]="paginatedUsersList.pagination.totalItems"
+      [itemsPerPage]="paginatedUsersList.pagination.itemsPerPage"
+      [(ngModel)]="paginatedUsersList.pagination.currentPage" (pageChanged)="pageChanged($event)" [boundaryLinks]="true"
       previousText="&lsaquo;" nextText="&rsaquo;" firstText="&laquo;" lastText="&raquo;">
     </pagination>
   </div>

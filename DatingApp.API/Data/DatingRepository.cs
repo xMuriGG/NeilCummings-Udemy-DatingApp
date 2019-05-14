@@ -26,32 +26,26 @@ namespace DatingApp.API.Data
             _db.Remove(entity);
         }
 
-        public async Task<User> GetUserAsync(int id)
-        {
-            var user = await _db.Users.Include(i => i.Photos).FirstOrDefaultAsync(f => f.Id == id);
-            user.Photos = user.Photos?.OrderByDescending(ob => ob.IsMain).ToList();
-            return user;
-        }
-
-        public Task<Photo> GetPhoto(int id)
-        {
-            var photo = _db.Photos.FirstOrDefaultAsync(f => f.Id == id);
-            return photo;
-        }
-
-        public async Task<Photo> GetMainPhotoForUser(int userId)
-        {
-            var photo = await _db.Photos.Where(w => w.UserId == userId).FirstOrDefaultAsync(w => w.IsMain);
-            return photo;
-        }
-
         public async Task<PagedList<User>> GetUsersAsync(UserParams userParams)
         {
-            var query = _db.Users.Include(i => i.Photos).AsQueryable();
+            var query = _db.Users
+                .Include(i => i.Photos)
+                .Include(i=>i.Likers)
+                .Include(i=>i.Likees)
+                .AsQueryable();
             query = query.Where(w => (w.Gender == userParams.Gender || userParams.Gender == null) && w.Id != userParams.UserId);
+
+            if (userParams.Likers)
+            {
+                query = query.Where(w => w.Likees.Any(a=>a.LikeeId==userParams.UserId));
+            }
+            if (userParams.Likees)
+            {
+                query = query.Where(w => w.Likers.Any(a => a.LikerId == userParams.UserId));
+            }
+
             DateTime? minDob = null;
             DateTime? maxDob = null;
-
             if (userParams.MaxAge is int max)
             {
                 minDob = DateTime.Today.AddYears(-max - 1);
@@ -72,7 +66,7 @@ namespace DatingApp.API.Data
                 switch (userParams.OrderBy)
                 {
                     case "created":
-                        query = query.OrderBy(o => o.Created);break;
+                        query = query.OrderBy(o => o.Created); break;
                     case "createdDesc":
                         query = query.OrderByDescending(o => o.Created);
                         break;
@@ -82,9 +76,10 @@ namespace DatingApp.API.Data
                     case "ageDesc":
                         query = query.OrderByDescending(o => o.DateOfBirth);
                         break;
-                    default: query = query.OrderByDescending(o => o.LastActive);
+                    default:
+                        query = query.OrderByDescending(o => o.LastActive);
                         break;
-                    
+
                 }
             }
 
@@ -92,6 +87,36 @@ namespace DatingApp.API.Data
 
             return pagedList;
         }
+
+        public async Task<User> GetUserAsync(int id)
+        {
+            var user = await _db.Users.Include(i => i.Photos).FirstOrDefaultAsync(f => f.Id == id);
+            user.Photos = user.Photos?.OrderByDescending(ob => ob.IsMain).ToList();
+            return user;
+        }
+
+        public Task<bool> UserExistsAsync(int id)
+        {
+            return _db.Users.AnyAsync(a => a.Id == id);
+        }
+
+        public Task<Photo> GetPhotoAsync(int id)
+        {
+            var photo = _db.Photos.FirstOrDefaultAsync(f => f.Id == id);
+            return photo;
+        }
+
+        public async Task<Photo> GetMainPhotoForUserAsync(int userId)
+        {
+            var photo = await _db.Photos.Where(w => w.UserId == userId).FirstOrDefaultAsync(w => w.IsMain);
+            return photo;
+        }
+
+        public async Task<Like> GetLikeAsync(int userId, int recipientId)
+        {
+            var like =await _db.Likes.FirstOrDefaultAsync(f => f.LikerId == userId && f.LikeeId == recipientId);
+            return like;
+        }     
 
         public async Task<bool> SaveAll()
         {
@@ -101,7 +126,7 @@ namespace DatingApp.API.Data
             }
             catch (DbUpdateException e)
             {
-                throw new System.Exception("Greška prilikom spremanja podataka u ", e);
+                throw new System.Exception("Greška prilikom spremanja podataka u bazu", e);
             }
         }
     }
